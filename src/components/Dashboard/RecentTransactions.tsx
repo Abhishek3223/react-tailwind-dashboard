@@ -80,7 +80,7 @@ const TableHead = () => (
 
 
 
-export const TableRow = ({
+ const TableRow = ({
   userId,
   name,
   email,

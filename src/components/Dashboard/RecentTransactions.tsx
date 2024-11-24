@@ -15,9 +15,9 @@ export const UserList = () => {
   const [isModalOpen, setModalOpen] = useState(false);
 
   return (
-    <div className="w-full">
-      <div className="flex items-center justify-between">
-        <h3 className="mb-4 font-medium flex-row w-full text-lg flex items-center gap-2">
+    <div className="w-full px-5">
+      <div className="flex  items-center justify-between">
+        <h3 className="mb-4 font-medium flex-row w-full text-lg px-4 flex items-center gap-2">
           <FiUsers /> User Management
         </h3>
 
@@ -71,6 +71,7 @@ const TableHead = () => (
       <th className="text-start p-1.5 border border-gray-300">Email</th>
       <th className="text-start p-1.5 border border-gray-300">Role</th>
       <th className="text-start p-1.5 border border-gray-300">Status</th>
+      <th className="text-start p-1.5 border border-gray-300">Actions</th>
     </tr>
   </thead>
 );
@@ -126,7 +127,7 @@ export const TableRow = ({
         >
           {status}
         </td>
-        <td className="p-3 border border-gray-300 flex items-center gap-2">
+        <td className="p-3  flex items-center gap-2">
           <button
             onClick={toggleEditModal}
             className="flex text-sm w-[120px] text-center items-center gap-2 bg-stone-100 transition-colors hover:bg-violet-100 hover:text-violet-700 px-3 py-1.5 rounded"
@@ -166,8 +167,8 @@ export const TableRow = ({
             </p>
             <div className="flex justify-end gap-3">
               <button
-                onClick={toggleDeleteConfirm}
                 className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 border border-gray-300 rounded hover:bg-gray-200"
+                onClick={toggleDeleteConfirm}
               >
                 Cancel
               </button>

@@ -19,7 +19,6 @@ interface AppStore {
     updateUser: (updatedUser: User) => void;
     removeUser: (userId: string) => void;
 
-    // Permission Management
     updatePermissions: (userId: string, permissions: string[]) => void;
 }
 

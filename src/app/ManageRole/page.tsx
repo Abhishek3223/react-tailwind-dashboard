@@ -3,7 +3,7 @@
 import { TopBar } from "@/components/Dashboard/TopBar";
 import { useUserStore } from "@/store/store"
 import { useEffect, useState } from "react";
-import { FiPlus, FiUsers } from "react-icons/fi";
+import { FiEdit, FiPlus, FiTrash2, FiUsers } from "react-icons/fi";
 
 interface Role {
     id: string;
@@ -15,28 +15,25 @@ export default function Page() {
     const roles = useUserStore((state: any) => state.users);
     const removeRole = useUserStore((state: any) => state.removeRole);
     const [isModalOpen, setModalOpen] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [selectedRole, setSelectedRole] = useState<Role | null>(null);
-
-    const handleDelete = (roleId: string) => {
-        if (confirm("Are you sure you want to delete this role?")) {
-            removeRole(roleId);
-        }
+    const deleteUser = useUserStore((state) => state.removeUser);
+    const handleDelete = () => {
+        deleteUser(user?.id || "");
+        setIsDeleting(false);
     };
-
+    const toggleDeleteConfirm = () => setIsDeleting(!isDeleting);
     const openModal = (role?: Role) => {
         setSelectedRole(role || null);
         setModalOpen(true);
     };
+    const [user, setUser] = useState()
 
     const closeModal = () => {
         setSelectedRole(null);
         setModalOpen(false);
     };
-    useEffect(() => {
-        console.log(localStorage.users);
 
-
-    }, [])
 
 
     return (
@@ -68,24 +65,38 @@ export default function Page() {
                     <tbody>
                         {roles?.length > 0 ? (
                             roles?.map((role: any) => (
-                                <tr key={role.id}>
-                                    <td className="p-3 border">{role.id}</td>
-                                    <td className="p-3 border">{role.name}</td>
-                                    <td className="p-3 border">
-                                        {role.permissions?.length > 0 && role.permissions?.join(", ")}
+                                <tr key={role.id} className="hover:bg-gray-100 transition-colors">
+                                    <td className="p-4 border border-gray-300 text-black text-sm">{role.id}</td>
+                                    <td className="p-4 border border-gray-300 text-black text-sm font-medium">{role.name}</td>
+                                    <td className="p-4 border border-gray-300 text-gray-700 text-sm">
+                                        {role.permissions?.length > 0 ? (
+                                            <div className="list-disc flex gap-1 pl-5">
+                                                {role.permissions?.map((permission: string, index: number) => (
+                                                    <p key={index} className="text-sm text-gray-700">{permission}</p>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <span className="text-gray-500 italic">No Permissions</span>
+                                        )}
                                     </td>
-                                    <td className="p-3 border">
+
+                                    <td className="p-3  flex items-center border-b-1  gap-2">
                                         <button
-                                            className="px-3 py-1 bg-blue-600 text-white rounded mr-2"
+                                            className="flex text-sm w-[120px] text-center items-center gap-2 bg-stone-100 transition-colors hover:bg-violet-100 hover:text-violet-700 px-3 py-1.5 rounded"
                                             onClick={() => openModal(role)}
                                         >
-                                            Edit
+                                            <FiEdit className="inline-block" /> Edit
                                         </button>
                                         <button
-                                            className="px-3 py-1 bg-red-600 text-white rounded"
-                                            onClick={() => handleDelete(role.id)}
+                                            className="flex text-sm w-[120px] text-center items-center gap-2 bg-stone-100 transition-colors hover:bg-violet-100 hover:text-red-400 px-3 py-1.5 rounded"
+                                            onClick={() => {
+                                                setUser(role)
+                                                toggleDeleteConfirm()
+
+                                            }
+                                            }
                                         >
-                                            Delete
+                                            <FiTrash2 className="inline-block" /> Delete
                                         </button>
                                     </td>
                                 </tr>
@@ -94,16 +105,43 @@ export default function Page() {
                             <tr>
                                 <td
                                     colSpan={4}
-                                    className="p-3 text-center text-gray-500"
+                                    className="p-4 text-center text-gray-600 font-light bg-gray-50"
                                 >
                                     No roles found. Add a new role to get started.
                                 </td>
                             </tr>
                         )}
                     </tbody>
+
                 </table>
 
                 {/* Edit Role Modal */}
+                {isDeleting && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                        <div className="bg-white p-6 rounded-md shadow w-full max-w-md">
+                            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                                Confirm Deletion
+                            </h3>
+                            <p className="text-gray-600 mb-6">
+                                Are you sure you want to delete ?
+                            </p>
+                            <div className="flex justify-end gap-3">
+                                <button
+                                    className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 border border-gray-300 rounded hover:bg-gray-200"
+                                    onClick={toggleDeleteConfirm}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleDelete}
+                                    className="px-4 py-2 text-sm font-medium text-white bg-gray-700 border border-gray-700 rounded hover:bg-gray-800"
+                                >
+                                    Confirm
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
                 {isModalOpen && (
                     <EditRoleModal
                         role={selectedRole}
@@ -128,10 +166,7 @@ export const EditRoleModal = ({ role, closeModal }: any) => {
             alert("Role name cannot be empty.");
             return;
         }
-
-
         updateRole(role.id, permissions);
-
         closeModal();
     };
 
@@ -141,54 +176,59 @@ export const EditRoleModal = ({ role, closeModal }: any) => {
                 ? prev.filter((p: any) => p !== permission)
                 : [...prev, permission]
         );
-        console.log(permissions);
-
     };
 
     const availablePermissions = ["Read", "Write", "Delete"];
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="bg-white p-6 rounded-md shadow-lg w-full max-w-sm">
-                <h3 className="text-lg font-semibold mb-4">
+            <div className="bg-white p-6 rounded-md shadow-lg w-full max-w-md">
+                <h3 className="text-xl font-semibold mb-6 text-black">
                     {role ? "Edit Role" : "Add Role"}
                 </h3>
-                <div className="mb-4">
-                    <label className="block text-sm font-medium mb-1">
+
+                <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                         Role Name
                     </label>
                     <input
                         type="text"
-                        className="w-full px-3 py-2 border border-gray-300 rounded"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
+                        placeholder="Enter role name"
                     />
                 </div>
+
                 <div className="mb-6">
-                    <label className="block text-sm font-medium mb-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                         Permissions
                     </label>
-                    {availablePermissions.map((permission) => (
-                        <div key={permission} className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                checked={permissions.includes(permission)}
-                                onChange={() => togglePermission(permission)}
-                            />
-                            <span>{permission}</span>
-                        </div>
-                    ))}
+                    <div className="space-y-3">
+                        {availablePermissions.map((permission) => (
+                            <div key={permission} className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    checked={permissions.includes(permission)}
+                                    onChange={() => togglePermission(permission)}
+                                    className="w-5 h-5 text-black border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                                />
+                                <span className="text-gray-800 text-sm">{permission}</span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-                <div className="flex justify-end gap-2">
+
+                <div className="flex justify-end gap-3 mt-6">
                     <button
                         onClick={closeModal}
-                        className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-200 rounded hover:bg-gray-300"
+                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition duration-300"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={handleSave}
-                        className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded hover:bg-blue-700"
+                        className="px-4 py-2 text-sm font-medium text-white bg-black rounded-md hover:bg-gray-900 transition duration-300"
                     >
                         Save
                     </button>

@@ -154,8 +154,7 @@ export default function Page() {
 }
 
 
-
-export const EditRoleModal = ({ role, closeModal }: any) => {
+const EditRoleModal = ({ role, closeModal }: any) => {
     const [name, setName] = useState(role?.name || "");
     const [permissions, setPermissions] = useState(role?.permissions || []);
 

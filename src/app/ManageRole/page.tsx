@@ -27,7 +27,7 @@ export default function Page() {
         setSelectedRole(role || null);
         setModalOpen(true);
     };
-    const [user, setUser] = useState()
+    const [user, setUser] = useState<any>()
 
     const closeModal = () => {
         setSelectedRole(null);
